@@ -164,12 +164,7 @@ all_fields_were_found () {
 //approach 1: make a vector of strings and just chop them, then index them.
 
 inline int get_SOC_category (string SOC_Code) { return stoi(SOC_Code.substr(0,2)); }
-inline int get_SOC_subcategory (string SOC_Code) {
-//	if(SOC_Code.size() == 7) 
-		return stoi(SOC_Code.substr(3,4)); 
-//	else
-//		return 0;
-}
+inline int get_SOC_subcategory (string SOC_Code) { return stoi(SOC_Code.substr(3,4)); }
 
 void Analyzer_Insight_Problem::
 Analyzer_line (string line)
@@ -220,7 +215,7 @@ Analyzer_line (string line)
 	//SOC codes and occupations.
 	string SOC_Code = entries[SOC_CODE_INDEX];
 	unsigned int SOC_Code_size = SOC_Code.size();
-	if(SOC_Code_size == 7)
+	if(SOC_Code_size >= 7) //SOC codes may be more than 7 characters, such as 12-1234.99. We truncate away the .99. 
 	    SOC_code_book->book_SOC_code(get_SOC_category(SOC_Code), get_SOC_subcategory(SOC_Code), entries[SOC_NAME_INDEX]);
 	else if(SOC_Code_size == 1 or SOC_Code_size == 2)
 	    SOC_code_book->book_SOC_code(stoi(SOC_Code), 0, entries[SOC_NAME_INDEX]);

@@ -151,8 +151,9 @@ void Write_Top_Occupations (vector<SOC_code_record*> records)
 	fprintf(output_file, "TOP_OCCUPATIONS;NUMBER_CERTIFIED_APPLICATIONS;PERCENTAGE\n");
 
 	//Print the top N entries
-	for (int i = 0;i<TOP_N_OCCUPATIONS;++i) 
-		fprintf(output_file, "%s;%i;%.1f\n",records[i]->SOC_Name.c_str(), records[i]->count, records[i]->percentage);  //Write to top occupations to file.
+	for (int i = 0;i<min(TOP_N_OCCUPATIONS,records.size());++i) 
+		if(records[i]->count > 0)
+			fprintf(output_file, "%s;%i;%.1f\n",records[i]->SOC_Name.c_str(), records[i]->count, records[i]->percentage);  //Write to top occupations to file.
 
 	fclose(output_file);
 }//end Write_Top_10_Occupations
