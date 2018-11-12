@@ -8,7 +8,7 @@
 #Make sure the directory structure is setup.
 mkdir -p input/
 mkdir -p output/
-mkdir -p insight_testsuite/tests/
+#mkdir -p insight_testsuite/tests/
 
 #Compile
 g++ -std=c++11 -Wall src/process_file.cpp -o process_file
