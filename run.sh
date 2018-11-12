@@ -1,10 +1,19 @@
 #!/bin/bash
+
+#Working ways to run this: 
+#./run.sh		#attempts to run the alphabetically first file it finds in the input/ directory
+#./run.sh H1B.csv	#If H1B.csv is not located in the current directy, but is in input/, this will process input/H1B.csv
+#./run.sh input/H1B.csv #Processes input/H1B.csv, presuming that it exists. 
+
+#Make sure the directory structure is setup.
 mkdir -p input/
 mkdir -p output/
 mkdir -p insight_testsuite/tests/
 
+#Compile
 g++ -std=c++11 -Wall src/process_file.cpp -o process_file
 
+#Handle input argument cases and run the program
 if [ $# -eq 0 ]; then #If no arguments, grab the first file we find from input/ and process that
     firstFile=$(ls input/ | head -1) 
 
