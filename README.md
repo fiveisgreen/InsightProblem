@@ -31,11 +31,11 @@ Frequently, SOC Codes are found with an extra 2 digits, such as 12-3456.99. It i
 ## Run 
 Available ways to run this:
 
-./run.sh               attempts to run the alphabetically first file it finds in the input/ directory
+./run.sh               # Attempts to run the alphabetically-first file it finds in the input/ directory
 
-./run.sh H1B.csv       If H1B.csv is not located in the current directory, but is in input/, this will process input/H1B.csv
+./run.sh H1B.csv       # If H1B.csv is not located in the current directory, but is in input/, this will process input/H1B.csv
 
-./run.sh input/H1B.csv Processes input/H1B.csv, presuming that it exists.
+./run.sh input/H1B.csv # Processes input/H1B.csv, presuming that it exists.
 
 run.sh compiles and runs process_file.cpp. It tries to accommodate whatever reasonable inputs the user gives to it, as stated above. It also enforces the presence of the input and output directories.
 
