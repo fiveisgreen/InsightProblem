@@ -177,8 +177,6 @@ Analyzer_line (string line)
 	if (not strings_match_exactly(entries[VISA_CLASS_INDEX], "H-1B")) 
 		return; //THere turn out to be a lot of E-3 Australian visas mixed in.
 
-	cout<<entries[CASE_NUMBER_INDEX]<<endl;//To query the test.
-
 	//States
 	string state = entries[WORKLOC1_STATE_INDEX];
 	if (state.size() == 2){
