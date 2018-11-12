@@ -30,5 +30,10 @@ int count_entries(map<string,int>& Map)
         return total;
 }
 
+inline int min(int a,unsigned int b){
+        int B = b;
+        return a<B?a:B;
+}
+
 #endif //MAP_UTILITIES_CPP
 

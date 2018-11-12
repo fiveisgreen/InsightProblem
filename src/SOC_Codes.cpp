@@ -129,10 +129,11 @@ make_sorted_SOC_code_record_list (SOC_Code_Book &SOC_code_book, map<int, string>
 		}//for every subcategory
 	}//end for every category
 
-	nth_element(SOC_Code_list.begin(), SOC_Code_list.begin() + TOP_N_OCCUPATIONS, SOC_Code_list.end(), SOC_code_record_Compare);
+	int n = min(TOP_N_OCCUPATIONS,SOC_Code_list.size());//this min is needed for very short lists.
+	nth_element(SOC_Code_list.begin(), SOC_Code_list.begin() + n, SOC_Code_list.end(), SOC_code_record_Compare);
 	//Gather the leading 10 or 11 occpuations to the beginning of the list.
         //depending on implimentation, this may sort the first 10 (C++2011) or 11 (C++2014) elements.
-	sort(SOC_Code_list.begin(), SOC_Code_list.begin() + (TOP_N_STATES -1), SOC_code_record_Compare); //Sort the first 10 elements. 
+	sort(SOC_Code_list.begin(), SOC_Code_list.begin() + (n-1), SOC_code_record_Compare); //Sort the first 10 elements. 
 	//std::sort(SOC_Code_list.begin(), SOC_Code_list.end(), SOC_code_record_Compare);
 
 	return SOC_Code_list;

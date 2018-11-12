@@ -86,8 +86,9 @@ void Write_Top_States (vector<state_record*> records)
 
 	//Print the top N entries
 	//for (int i = 0;i<60;++i) 
-	for (int i = 0;i<TOP_N_STATES;++i) 
-		fprintf(output_file, "%s;%i;%.1f\n",Capitalize(records[i]->state_abbrev).c_str(), records[i]->count, records[i]->percentage);  //Write top states to file
+	for (int i = 0;i<min(TOP_N_STATES,records.size());++i) 
+		if(records[i]->count > 0)
+			fprintf(output_file, "%s;%i;%.1f\n",Capitalize(records[i]->state_abbrev).c_str(), records[i]->count, records[i]->percentage);  //Write top states to file
 
 	fclose(output_file);
 }//end WriteState
