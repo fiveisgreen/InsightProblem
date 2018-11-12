@@ -177,33 +177,15 @@ Analyzer_line (string line)
 	if (not strings_match_exactly(entries[VISA_CLASS_INDEX], "H-1B")) 
 		return; //THere turn out to be a lot of E-3 Australian visas mixed in.
 
-	//for testing:
-	//cout<<entries[CASE_NUMBER_INDEX]<<endl;
-	/*bool probe = strings_match_exactly(entries[CASE_NUMBER_INDEX],"I-200-16224-225278");//"I-200-16011-624844");
-	if(probe){
-		cout<<line<<endl;
-		for(int i = 0;i<entries.size();i++) cout<<"    "<<entries[i]<<endl;
-
-		cout<<"    STATUS: "<< entries[STATUS_INDEX]<<endl;
-		cout<<"    VISA_CLASS: "<< entries[VISA_CLASS_INDEX]<<endl;
-		cout<<"    SOC_CODE: "<< entries[SOC_CODE_INDEX]<<endl;
-		cout<<"    SOC_NAME: "<< entries[SOC_NAME_INDEX]<<endl;
-		cout<<"    EMPLOYER_STATE: "<< entries[EMPLOYER_STATE_INDEX]<<endl;
-		cout<<"    WORKLOC1_STATE_INDEX: "<< entries[WORKLOC1_STATE_INDEX]<<endl;
-	}*/
+	cout<<entries[CASE_NUMBER_INDEX]<<endl;//To query the test.
 
 	//States
 	string state = entries[WORKLOC1_STATE_INDEX];
-	/*if (is_empty_string(state)) {
-		cout<<"Work state missing, using employer state"<<endl; //Check whether we actually need EMPLOYER_STATE
-		state = entries[EMPLOYER_STATE_INDEX];  //if there is no Work State listed, try the Employer state.
-	}*/
 	if (state.size() == 2){
 		State_book[state] += 1; //else, state is found, increment it's counter.
 	} else {
 		State_book["??"] += 1; //If we still don't find a listed state, increment the ?? state counter.
 
-		//TODO: remove: if something meses up the state, investigate
 		cout<<"State not formatted as a state. Booking state as ??. CASE_NUMBER = "<<entries[CASE_NUMBER_INDEX]<<endl;
 		cout<<"    STATUS: "<< entries[STATUS_INDEX]<<endl;
 		cout<<"    VISA_CLASS: "<< entries[VISA_CLASS_INDEX]<<endl;
