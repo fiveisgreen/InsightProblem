@@ -36,8 +36,7 @@ int process_file(string input_file_name)
 		cout<<"start"<<endl;
 	
 		//Primary line loop
-                while (input_file)  //TODO make this a seperate function.
-                {
+                while (input_file) {
                         string thisline;
                         if (!getline( input_file, thisline ))  //both read file into thisline, and termination condition
 				break;  
@@ -54,7 +53,6 @@ int process_file(string input_file_name)
 		return -1;
 	}
 
-	cout<<"Writing Results"<<endl;
 	analyzer->Write_Results();  //Generate output files containing the top 10 lists.
 
 	input_file.close();

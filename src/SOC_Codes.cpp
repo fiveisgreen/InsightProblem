@@ -70,7 +70,7 @@ struct SOC_Code_Book
 	~SOC_Code_Book () { 
 		delete[] SOC_Code_Categories; 
 		delete SOC_Code_to_SOC_name;
-	}//TODO: prove that this works make this work
+	}
 
 	void book_SOC_code (int SOC_category, int SOC_subcategory, string SOC_Name) {
 		//speed critical.  Assumes steralized inputs. 
@@ -113,7 +113,7 @@ make_sorted_SOC_code_record_list (SOC_Code_Book &SOC_code_book, map<int, string>
 
 			record->SOC_Code = concat_SOC_category(icat,ith_SOC_Code_Category->SOC_subcategories[j_subcat]);
 			record->count = ith_SOC_Code_Category->counts[j_subcat];
-			record->percentage = (100.0*ith_SOC_Code_Category->counts[j_subcat])/total; //TODO test this line in detail
+			record->percentage = (100.0*ith_SOC_Code_Category->counts[j_subcat])/total; 
 			
 			if (is_in_map(record->SOC_Code, SOC_Code_to_SOC_name)) { //check that the SOC key is in the map. 
 				record->SOC_Name =  Capitalize(SOC_Code_to_SOC_name[record->SOC_Code]);
@@ -134,7 +134,6 @@ make_sorted_SOC_code_record_list (SOC_Code_Book &SOC_code_book, map<int, string>
 	//Gather the leading 10 or 11 occpuations to the beginning of the list.
         //depending on implimentation, this may sort the first 10 (C++2011) or 11 (C++2014) elements.
 	sort(SOC_Code_list.begin(), SOC_Code_list.begin() + (n-1), SOC_code_record_Compare); //Sort the first 10 elements. 
-	//std::sort(SOC_Code_list.begin(), SOC_Code_list.end(), SOC_code_record_Compare);
 
 	return SOC_Code_list;
 }//end Make_Sorted_SOC_Code_list

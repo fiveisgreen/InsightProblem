@@ -33,7 +33,6 @@ class Analyzer_Insight_Problem : public Analyzer {
 		bool Analyze_Header (string firstline);
 		void Analyzer_line (string line);
 		void Write_Results ();	
-		//vector<string> entries = Parse_line (line, desired_fields);
 
 	protected:
 		bool all_fields_were_found ();
@@ -44,7 +43,6 @@ class Analyzer_Insight_Problem : public Analyzer {
 		int VISA_CLASS_INDEX;
 		int SOC_CODE_INDEX;
 		int SOC_NAME_INDEX;
-		//int EMPLOYER_STATE_INDEX;
 		int WORKLOC1_STATE_INDEX;
 		//int WORKLOC2_STATE_INDEX;
 
@@ -61,7 +59,6 @@ Analyzer_Insight_Problem ()
 	VISA_CLASS_INDEX     = not_set;
 	SOC_CODE_INDEX       = not_set;
 	SOC_NAME_INDEX       = not_set;
-	//EMPLOYER_STATE_INDEX = not_set;
 	WORKLOC1_STATE_INDEX = not_set;
 
 	Build_state_map(State_book);
@@ -123,12 +120,7 @@ Analyze_Header(string firstline)
 				(Contains("WORKSITE_STATE", THIS_FIELD ) or Contains("LCA_CASE_WORKLOC1_STATE", THIS_FIELD) or Contains("STATE_1", THIS_FIELD) )) {
 			WORKLOC1_STATE_INDEX = n;
 			//2008 uses STATE_1, 2011-2014 used LCA_CASE_WORKLOC1_STATE, 2015 on use WORKSITE_STATE
-		} /*else if (EMPLOYER_STATE_INDEX == not_set and 
-				(Contains("EMPLOYER_STATE", THIS_FIELD ) or strings_match_exactly("STATE", THIS_FIELD))) {
-			EMPLOYER_STATE_INDEX = n;
-			//2008 uses STATE, 2011-2014 used LCA_CASE_EMPLOYER_STATE, 2015 on use EMPLOYER_STATE
-			//cout<<"EMPLOYER_STATE found! EMPLOYER_STATE_INDEX = "<<n<<endl;//TEST
-		}*/
+		} 
 	}//end for each field in the header 
 
 	return all_fields_were_found();
@@ -142,7 +134,6 @@ all_fields_were_found () {
 			     (VISA_CLASS_INDEX == not_set) or 
 			     (SOC_CODE_INDEX == not_set) or 
 			     (SOC_NAME_INDEX == not_set) or 
-			     //(EMPLOYER_STATE_INDEX == not_set) or 
 			     (WORKLOC1_STATE_INDEX == not_set);
 
 	//cout<<"The value of something_not_set is"<<something_not_set<<endl;
@@ -154,7 +145,6 @@ all_fields_were_found () {
 		cout<<"VISA_CLASS: \t\t"<<(VISA_CLASS_INDEX >= 0?"found":"NOT FOUND")<<endl;
 		cout<<"SOC_CODE: \t\t"<<(SOC_CODE_INDEX >= 0?"found":"NOT FOUND")<<endl;
 		cout<<"SOC_NAME: \t\t"<<(SOC_NAME_INDEX >= 0?"found":"NOT FOUND")<<endl;
-		//cout<<"EMPLOYER_STATE: \t"<<(EMPLOYER_STATE_INDEX >= 0?"found":"NOT FOUND")<<endl;
 		cout<<"WORKLOC1_STATE: \t"<<(WORKLOC1_STATE_INDEX >= 0?"found":"NOT FOUND")<<endl;
 	}
 	return not something_not_set;
@@ -229,41 +219,8 @@ bool Parse_line_and_select (string line, vector<string>& entries, int cut_field 
 */
 
 //approach 3: don't push back every entry, but instead only save those entries that are meaningful to you. 
-	//this requires the conditionals to be inside the parse loop
+	//do this by putting the conditionals inside the parse loop
 
 //Parse line needs to be fast.
-
-
-/*	 //Example code code of a file reader and line parser.
-void populate_from_file(eventRegistry* BadEventRegistry, string filename, bool verbose) {
-        if (verbose) 
-		cout << "Reading CSC file" << std::endl;
-        long int nEventsRead = 0;
-        ifstream infile( filename );
-        while (infile) {
-                string thisline;
-                if (!getline( infile, thisline )) 
-			break;
-
-                istringstream thisline_stringstream( thisline );
-                vector <string> line;
-                while (thisline_stringstream) {
-                        string thenumber;
-                        if (!getline( thisline_stringstream, thenumber, ':' )) 
-				break;
-                        line.push_back( thenumber );
-                }
-                int run= std::atoi(line[0].c_str());
-                int lumi = std::atoi(line[1].c_str());
-                int event= std::atoi(line[2].c_str());
-                RegisterEvent(run, lumi, event, BadEventRegistry);
-                nEventsRead++;
-        }
-        if (!infile.eof()) 
-		cerr << "Error while reading bad event file!";
-        if (verbose) 
-		cout << "Done reading Bad Evetns file, read in  "<<nEventsRead << " events"<<std::endl;
-}//end populate_from_file
-*/
 
 #endif //ANALYZER_CPP
