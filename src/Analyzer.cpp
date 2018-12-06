@@ -25,8 +25,9 @@ class Analyzer {
         virtual void Analyzer_line (string line) {}
         virtual void Write_Results () {}
 };
- 
-class Analyzer_Insight_Problem : public Analyzer {
+
+
+class Analyzer_Insight_Problem : public Analyzer { //runs 647853 entries in 24.8s 
     public:
         Analyzer_Insight_Problem ();
         ~Analyzer_Insight_Problem () {    delete SOC_code_book;   }
@@ -157,8 +158,9 @@ inline int get_SOC_category (string SOC_Code) { return stoi(SOC_Code.substr(0,2)
 inline int get_SOC_subcategory (string SOC_Code) { return stoi(SOC_Code.substr(3,4)); }
  
 void Analyzer_Insight_Problem::
-Analyzer_line (string line) {   
+Analyzer_line (string line) {    
     //Approach 1. Fully parse every line, then index the resulting vector. 
+    //Most general, also the slowest. 
     vector<string> entries = Parse_line_safely(line);//Parse_line(line);
  
     //Check if this is an entry we want to record.
@@ -197,27 +199,20 @@ Analyzer_line (string line) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
 //approach 2: start making a vector of strings, and if you get to field VISA_CLASS and it's not CERTIFIED, stop.
-class Analyzer_Insight_Problem_v2 : public Analyzer_Insight_Problem {
+class Analyzer_Insight_Problem_v2 : public Analyzer_Insight_Problem { //runs 647853 entries in 23.5 seconds
     public: 
     void Analyzer_line (string line);
 };
-class Analyzer_Insight_Problem_v3 : public Analyzer_Insight_Problem {
-    public: 
-    void Analyzer_line (string line);
-};
- 
  
 void Analyzer_Insight_Problem_v2::
 Analyzer_line (string line) {   
     //approach 2: start making a vector of strings, and if you get to field VISA_CLASS and it's not CERTIFIED, stop.
+    //This is somewhat task spicific, 
+    //runs 647853 entries in 23.5 seconds. It assuming that cuts will be made on status and visa class.
  
     vector<string> entries;
     if (Parse_line_safely_cuts(line, STATUS_INDEX, VISA_CLASS_INDEX, "CERTIFIED", "H-1B", entries) )
         return;
-//WORKLOC1_STATE_INDEX
-//SOC_NAME_INDEX
-//SOC_CODE_INDEX
-//CASE_NUMBER_INDEX
  
     //States
     string state = entries[WORKLOC1_STATE_INDEX];
@@ -246,10 +241,17 @@ Analyzer_line (string line) {
  
 }//end Analyzer_line v2
 
+class Analyzer_Insight_Problem_v3 : public Analyzer_Insight_Problem { //runs 647853 entries in 19.6 seconds
+    public: 
+    void Analyzer_line (string line);
+};
+ 
 void Analyzer_Insight_Problem_v3::
 Analyzer_line (string line) {   
     //approach 3: don't push back every entry, but instead only save those entries that are meaningful to you. 
     //do this by putting the conditionals inside the parse loop
+    //This is very task spicific and not as flexible
+    //with this, we run 647853 entries in 19.6 seconds
 
     istringstream thisline_stringstream( line );  //read the next line of the file into the string 
 
@@ -312,5 +314,60 @@ Analyzer_line (string line) {
         SOC_code_book->book_SOC_code(0, 0, SOC_Name);
  
 }//end Analyzer_line v3
+
+//dolittle is a little Analyzer, just for testing the speed at which we read in lines and parse them with gitline.
+//This tells us about the maximum speed that any Analyzer class class can possibly run that operates with istringstream.getline
+//I find that it can run 647853 entries in 10.05 seconds, so half our run time just goes into reading. 
+class dolittle : public Analyzer { //runs 647853 entries in 10.9 s
+    public:
+	bool Analyze_Header (string firstline){ j = 0; return true;}
+	void Analyzer_line (string line){
+	    //for every line, read the first 8 semi-colon delimited entries and add the first character of each to j.
+	    istringstream thisline_stringstream( line );  //read the next line of the file into the string 
+	    for(int i=0;i<8 and thisline_stringstream;i++){
+		string this_entry;
+		if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string. 
+		    break;
+		j += this_entry[0];
+	    }//end for
+	}//end Analyzer_line
+	void Write_Results () { cout <<"J: "<<j<<endl;}
+	int j;
+};
+
+//doless is another theoretical class, who'se only point is to test the speed of ifstream getline. 
+class doless : public Analyzer {  //runs 647853 entries in 8.71s. 
+    public:
+	bool Analyze_Header (string firstline){ j = 0; return true;}
+	void Analyzer_line (string line){ j += line[0]; } //add the first character of every line to j
+	void Write_Results () { cout <<"J: "<<j<<endl;}
+	int j;
+};
+
+//tacks on both reading, parsing, and handeling semicolon parser errors.
+class dolittle_scp: public Analyzer { //runs 647853 entries in 11.2s
+    public:
+	bool Analyze_Header (string firstline){ j = 0; return true;}
+	void Analyzer_line (string line){
+	    //for every line, read the first 8 semi-colon delimited entries and add the first character of each to j.
+	    istringstream thisline_stringstream( line );  //read the next line of the file into the string 
+	    parse_error_healer parser;
+	    for(int i=0;i<8 and thisline_stringstream;i++){
+		string this_entry;
+		if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string. 
+		    break;
+		if ( parser.handling_parser_errors(this_entry) ) continue; //consumes 0.3s
+		j += this_entry[0];
+	    }//end for
+	}//end Analyzer_line
+	void Write_Results () { cout <<"J: "<<j<<endl;}
+	int j;
+};
+
+//We find that just reading the file in line by line is taking most of the time of the dolittle,
+//reading in every line: 8.7s
+//parsing semicolons with getline: 2.2s.  
+//handeling parser errors: 0.3s
+//everything else--mostly booking: 8.4s
  
 #endif //ANALYZER_CPP

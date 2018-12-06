@@ -17,8 +17,6 @@ int process_file(string input_file_name){
 	}
 
 	Analyzer* analyzer = new Analyzer_Insight_Problem_v3();//19.6s
-	//Analyzer* analyzer = new Analyzer_Insight_Problem_v2();//23.5s
-	//Analyzer* analyzer = new Analyzer_Insight_Problem(); //24.8s
         clock_t post_header_clock;//TEST
 	clock_t endwhile_clock;//TEST
 
