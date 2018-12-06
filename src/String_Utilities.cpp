@@ -96,51 +96,6 @@ vector<string> Parse_line_safely (string line)
                 entries.push_back( this_entry );
         }
         return entries;
-} //end Parse_line_safely
-
-bool Parse_line_safely_cuts(string line, const int &status_index, const int &visa_class_index, const string &status, const string &visa_class, vector<string> &entries){
-	//Looks for the entry at status_index to match status, and for the entry at visa_class_index to match visa_class
-	//If either of those don't match, return true and stop reading the line. So the rest of the program can skip the line.
-	//else return false, and read the whole line into entries.
-        istringstream thisline_stringstream( line );  //read the next line of the file into the string 
-	
-	int i=0;
-	bool semicolon_flag = false; //A flag to indicate that we need use the entry from the previous semicolon parse.
-	string first_part_of_entry = "";//A place to store the previous entry when needed.
-
-        while (thisline_stringstream) {  //for every semicollon delimited entry in the line
-                string this_entry;
-                if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string.
-			break;  
-
-		//Here we deal with misparsing from semicolons in the text of fields
-		if (semicolon_flag){ 
-			if (this_entry.rfind("\"") != string::npos) {
-				this_entry = first_part_of_entry+";"+this_entry;
-				semicolon_flag = false;
-			} else { //we haven't encountered the close quote, so there are multiple ;'s 
-				first_part_of_entry = first_part_of_entry+";"+this_entry;
-				continue;
-			}
-		} else if ( (this_entry.find("\"") != string::npos) and //There's a double quote
-			    (this_entry.find("\"") == this_entry.rfind("\""))) { //and no closing quote
-			//Then the field contains a semicolon, which has been misparsed. 
-			//It is necessary to join this_entry with the next entry according to the conditional above.
-			semicolon_flag = true;
-			first_part_of_entry = this_entry;			
-			continue;
-		}
-		
-		if (i==status_index     and not strings_match_exactly(this_entry, status)) 
-		    return true;
-		if (i==visa_class_index and not strings_match_exactly(this_entry, visa_class)) 
-		    return true;
-
-                entries.push_back( this_entry );
-		i++;
-        }
-        return false;
-}//Parse_line_safely_cuts
-
+}
 
 #endif //String_Utilities_CPP

@@ -157,8 +157,8 @@ inline int get_SOC_category (string SOC_Code) { return stoi(SOC_Code.substr(0,2)
 inline int get_SOC_subcategory (string SOC_Code) { return stoi(SOC_Code.substr(3,4)); }
 
 void Analyzer_Insight_Problem::
-Analyzer_line (string line) {	
-	//Approach 1. Fully parse every line, then index the resulting vector. 
+Analyzer_line (string line)
+{	//Approach 1. Fully parse every line, then index the resulting vector. 
 	vector<string> entries = Parse_line_safely(line);//Parse_line(line);
 
 	//Check if this is an entry we want to record.
@@ -196,138 +196,31 @@ Analyzer_line (string line) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 //approach 2: start making a vector of strings, and if you get to field VISA_CLASS and it's not CERTIFIED, stop.
-class Analyzer_Insight_Problem_v2 : public Analyzer_Insight_Problem {
-	public: 
-	void Analyzer_line (string line);
-};
-class Analyzer_Insight_Problem_v3 : public Analyzer_Insight_Problem {
-	public: 
-	void Analyzer_line (string line);
-};
+bool Parse_line_and_select (string line, vector<string>& entries, int cut_field = 1, string select_condition = "CERTIFIED")
+{
+	//This parses the line by ';' and stores each entry in string vector, then returns that vector.
+	//If you get to the CERTIFIED field, and 
+	istringstream thisline_stringstream( thisline ); //read the next line of the file into the string
+	int i=0;
+	while (thisline_stringstream) {  //for every semicollon delimited entry in the line
+		string this_entry;
+		if (!getline( thisline_stringstream, this_entry, ';' )) 
+			break; //parse the string, break when at the end of the string.
+		entries.push_back( this_entry );
 
-
-void Analyzer_Insight_Problem_v2::
-Analyzer_line (string line) {	
-	//approach 2: start making a vector of strings, and if you get to field VISA_CLASS and it's not CERTIFIED, stop.
-
-	vector<string> entries;
-	if (Parse_line_safely_cuts(line, STATUS_INDEX, VISA_CLASS_INDEX, "CERTIFIED", "H-1B", entries) )
-	    return;
-//WORKLOC1_STATE_INDEX
-//SOC_NAME_INDEX
-//SOC_CODE_INDEX
-//CASE_NUMBER_INDEX
-
-	//States
-	string state = entries[WORKLOC1_STATE_INDEX];
-	if (state.size() == 2){ //this if does not consume a measurable amount of time, but also never fails, can be removed.
-		State_book[state] += 1; //else, state is found, increment it's counter.
-	} else {
-		State_book["??"] += 1; //If we still don't find a listed state, increment the ?? state counter.
-
-		cout<<"State not formatted as a state. Booking state as ??. CASE_NUMBER = "<<entries[CASE_NUMBER_INDEX]<<endl;
-		cout<<"    STATUS: "<< entries[STATUS_INDEX]<<endl;
-		cout<<"    VISA_CLASS: "<< entries[VISA_CLASS_INDEX]<<endl;
-		cout<<"    SOC_CODE: "<< entries[SOC_CODE_INDEX]<<endl;
-		cout<<"    SOC_NAME: "<< entries[SOC_NAME_INDEX]<<endl;
-		cout<<"    WORKLOC1_STATE_INDEX: "<< entries[WORKLOC1_STATE_INDEX]<<endl;
+		if (i==cut_field and this_entry.compare(select_condition) != 0) 
+			return false; //if not CERTIFIED, stop parsing.
+		++i;
 	}
+	return true;
+}//end Parser_line
+*/
 
-	//SOC codes and occupations.
-	string SOC_Code = entries[SOC_CODE_INDEX];
-	unsigned int SOC_Code_size = SOC_Code.size();
-	if(SOC_Code_size >= 7) //SOC codes may be more than 7 characters, such as 12-1234.99. We truncate away the .99. 
-	    SOC_code_book->book_SOC_code(get_SOC_category(SOC_Code), get_SOC_subcategory(SOC_Code), entries[SOC_NAME_INDEX]);
-	else if(SOC_Code_size == 1 or SOC_Code_size == 2)
-	    SOC_code_book->book_SOC_code(stoi(SOC_Code), 0, entries[SOC_NAME_INDEX]);
-	else 
-	    SOC_code_book->book_SOC_code(0, 0, entries[SOC_NAME_INDEX]);
-
-}//end Analyzer_line v2
-
-void Analyzer_Insight_Problem_v3::
-Analyzer_line (string line) {	
-	//approach 3: don't push back every entry, but instead only save those entries that are meaningful to you. 
+//approach 3: don't push back every entry, but instead only save those entries that are meaningful to you. 
 	//do this by putting the conditionals inside the parse loop
 
-        istringstream thisline_stringstream( line );  //read the next line of the file into the string 
-
-	//Start parsing the line, only saving entries of interest
-        bool semicolon_flag = false; //A flag to indicate that we need use the entry from the previous semicolon parse.
-        string first_part_of_entry = "";//A place to store the previous entry when needed.
-
-        int i=0;
-	string case_number = "";
-	string state = "";
-	string SOC_Code = "";
-	string SOC_Name = "";
-
-	while (thisline_stringstream) {  //for every semicollon delimited entry in the line
-	    string this_entry;
-	    if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string.
-		break;
-
-
-
-	    //Here we deal with misparsing from semicolons in the text of fields
-	    if (semicolon_flag){ //usually false
-		if (this_entry.rfind("\"") != string::npos) {
-		    this_entry = first_part_of_entry+";"+this_entry;
-		    semicolon_flag = false;
-		} else { //we haven't encountered the close quote, so there are multiple ;'s 
-		    first_part_of_entry = first_part_of_entry+";"+this_entry;
-		    continue;
-		}
-	    } else if ( (this_entry.find("\"") != string::npos) and //There's a double quote //has to run a lot!
-		    (this_entry.find("\"") == this_entry.rfind("\""))) { //and no closing quote
-		//Then the field contains a semicolon, which has been misparsed. 
-		//It is necessary to join this_entry with the next entry according to the conditional above.
-		first_part_of_entry = this_entry;
-		semicolon_flag = true;
-		continue;
-	    }
-
-
-
-	    //identify and store entries of interest
-	    if (i == CASE_NUMBER_INDEX) case_number = this_entry;
-	    else if (i == STATUS_INDEX) {
-		if (not strings_match_exactly(this_entry, "CERTIFIED"))
-		    return;
-	    }
-	    else if (i == VISA_CLASS_INDEX) {
-		if (not strings_match_exactly(this_entry, "H-1B"))
-		    return;
-	    }
-	    else if (i == SOC_CODE_INDEX) SOC_Code = this_entry;
-	    else if (i == SOC_NAME_INDEX) SOC_Name = this_entry;
-	    else if (i == WORKLOC1_STATE_INDEX) state = this_entry;
-
-	    i++;
-	}//end while //end line parsing and cuts
-
-	//States
-	if (state.size() == 2){ //this if does not consume a measurable amount of time, but also never fails, can be removed.
-		State_book[state] += 1; //else, state is found, increment it's counter.
-	} else {
-		State_book["??"] += 1; //If we still don't find a listed state, increment the ?? state counter.
-
-		cout<<"State not formatted as a state. Booking state as ??. CASE_NUMBER = "<<case_number<<endl;
-		cout<<"    SOC_CODE: "<< SOC_Code<<endl;
-		cout<<"    SOC_NAME: "<< SOC_Name<<endl;
-		cout<<"    WORKLOC1_STATE_INDEX: "<< state<<endl;
-	}
-
-	//SOC codes and occupations.
-	unsigned int SOC_Code_size = SOC_Code.size();
-	if(SOC_Code_size >= 7) //SOC codes may be more than 7 characters, such as 12-1234.99. We truncate away the .99. 
-	    SOC_code_book->book_SOC_code(get_SOC_category(SOC_Code), get_SOC_subcategory(SOC_Code), SOC_Name);
-	else if(SOC_Code_size == 1 or SOC_Code_size == 2)
-	    SOC_code_book->book_SOC_code(stoi(SOC_Code), 0, SOC_Name);
-	else 
-	    SOC_code_book->book_SOC_code(0, 0, SOC_Name);
-
-}//end Analyzer_line v3
+//Parse line needs to be fast.
 
 #endif //ANALYZER_CPP

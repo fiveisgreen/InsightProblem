@@ -6,9 +6,8 @@
 
 using namespace std;
 
-void print_run_time(float time_in_seconds);
-
-int process_file(string input_file_name){ 
+int process_file(string input_file_name)
+{ 
 	//returns 1 if successful. Returns 0 if the file doesn't exist, or is empty, or is a recipie for cookies. Return -1 if some other error.
 
 	if (not file_Exists(input_file_name)) {
@@ -16,11 +15,7 @@ int process_file(string input_file_name){
 		return 0;
 	}
 
-	Analyzer* analyzer = new Analyzer_Insight_Problem_v3();//20.0s
-	//Analyzer* analyzer = new Analyzer_Insight_Problem_v2();//23.5s
-	//Analyzer* analyzer = new Analyzer_Insight_Problem(); //24.8s
-        clock_t post_header_clock;//TEST
-	clock_t endwhile_clock;//TEST
+	Analyzer* analyzer = new Analyzer_Insight_Problem();
 
         ifstream input_file( input_file_name.c_str() );
 
@@ -32,16 +27,15 @@ int process_file(string input_file_name){
                     return -1;
                 }
 
-		bool successfully_analyzed_header = analyzer->Analyze_Header(firstline);  //interpret the first line to determine where columns of interest are //0.3ms
+		bool successfully_analyzed_header = analyzer->Analyze_Header(firstline);  //interpret the first line to determine where columns of interest are
 
 		if (not successfully_analyzed_header) {
                     cerr << "Error! Expected header format not found. No output will be produced!"<<endl;
                     return 0;
 		}
 		cout<<"start"<<endl;
-
+	
 		//Primary line loop
-		/** Time the loop **/ post_header_clock = clock(); //TEST
                 while (input_file) {
                         string thisline;
                         if (!getline( input_file, thisline ))  //both read file into thisline, and termination condition
@@ -49,7 +43,6 @@ int process_file(string input_file_name){
 
 			analyzer->Analyzer_line(thisline);  //analyze line and book contents into memory internal to the Analyzer
                 }//end while read file 
-        	/** End timer **/ endwhile_clock= clock();//TEST //24.8s
         } else {
 		 cerr << "Error: Unable to open input file "<<input_file_name<<endl;
 		 return 0;
@@ -60,14 +53,10 @@ int process_file(string input_file_name){
 		return -1;
 	}
 
-	analyzer->Write_Results();  //Generate output files containing the top 10 lists. 0.8ms
+	analyzer->Write_Results();  //Generate output files containing the top 10 lists.
 
 	input_file.close();
-
-	//TEST:
-        cout << "Done. Main Loop time: "; 
-	print_run_time(((float) (endwhile_clock - post_header_clock))/CLOCKS_PER_SEC);
-
+	cout<<"Done"<<endl;
 	return 1;  //successful termination.
 }//end process_file
 
@@ -81,13 +70,4 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	return process_file(argv[1]);
-}
-
-void print_run_time(float time_in_seconds) {
-	if (time_in_seconds < 0.1)         cout<<time_in_seconds*1000. <<" ms";
-        else if (time_in_seconds < 120.)   cout<<time_in_seconds       <<" seconds";
-        else if (time_in_seconds < 3600.)  cout<<time_in_seconds/60.   <<" minutes";
-        else if (time_in_seconds < 86400.) cout<<time_in_seconds/3600. <<" hours";
-        else 	 			   cout<<time_in_seconds/86400.<<" days";
-	cout<<endl;
 }
