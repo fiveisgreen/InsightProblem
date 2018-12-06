@@ -58,44 +58,87 @@ vector<string> Parse_line (string line, char parse_char = ';')
 	
 	//So instead, use Parse_line_safely
 
+struct parse_error_healer{
+    //Here we deal with misparsing from semicolons in the text of fields
+    parse_error_healer(){
+        semicolon_flag = false;
+        first_part_of_entry = "";
+    }
+
+    bool handling_parser_errors(string& this_entry){
+        //this return true iff need to contine the read loop due to a parser error
+
+        if (semicolon_flag){ //usually false
+            if (this_entry.rfind("\"") != string::npos) {
+                this_entry = first_part_of_entry+";"+this_entry;
+                semicolon_flag = false;
+            } else { //we haven't encountered the close quote, so there are multiple ;'s 
+                first_part_of_entry = first_part_of_entry+";"+this_entry;
+                return true;
+            }
+        } else if ( (this_entry.find("\"") != string::npos) and //There's a double quote //has to run a lot!
+                (this_entry.find("\"") == this_entry.rfind("\""))) { //and no closing quote
+            //Then the field contains a semicolon, which has been misparsed. 
+            //It is necessary to join this_entry with the next entry according to the conditional above.
+            first_part_of_entry = this_entry;
+            semicolon_flag = true;
+            return true;
+        }
+        return false;
+    }//end set_entry_handling_parser_errors
+
+    bool semicolon_flag = false; //A flag to indicate that we need use the entry from the previous semicolon parse.
+    string first_part_of_entry = "";//A place to store the previous entry when needed.
+};
+
 vector<string> Parse_line_safely (string line)
 {	//This parses the line by ';' and stores each entry in string vector, then returns that vector.
 	//This is very spicific to the Insight problem, so there's no point in making it really general
         vector<string> entries;
         istringstream thisline_stringstream( line );  //read the next line of the file into the string 
 	
-	bool semicolon_flag = false; //A flag to indicate that we need use the entry from the previous semicolon parse.
-	string first_part_of_entry = "";//A place to store the previous entry when needed.
+	parse_error_healer parser;
 
         while (thisline_stringstream) {  //for every semicollon delimited entry in the line
                 string this_entry;
                 if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string.
 			break;  
 
-		//Here we deal with misparsing from semicolons in the text of fields
-		if (semicolon_flag){ 
-			//cout<<"Running misparser. Joining "<<first_part_of_entry<<" and "<< this_entry<<". Orig. line:"<<endl;
-			//cout<<line<<endl;
-			if (this_entry.rfind("\"") != string::npos) {
-				this_entry = first_part_of_entry+";"+this_entry;
-				semicolon_flag = false;
-			} else { //we haven't encountered the close quote, so there are multiple ;'s 
-				first_part_of_entry = first_part_of_entry+";"+this_entry;
-				continue;
-			}
-			//it may work better by commenting the else out and getting rid of the conditional entirely
-		} else if ( (this_entry.find("\"") != string::npos) and //There's a double quote
-			    (this_entry.find("\"") == this_entry.rfind("\""))) { //and no closing quote
-			//Then the field contains a semicolon, which has been misparsed. 
-			//It is necessary to join this_entry with the next entry according to the conditional above.
-			semicolon_flag = true;
-			first_part_of_entry = this_entry;			
-			continue;
-		}
+		//fill this_entry, continuing and appending as necessary to correctly handle parser errors. 
+		if ( parser.handling_parser_errors(this_entry) ) continue;
 		
                 entries.push_back( this_entry );
         }
         return entries;
-}
+} //end Parse_line_safely
+
+bool Parse_line_safely_cuts(string line, const int &status_index, const int &visa_class_index, const string &status, const string &visa_class, vector<string> &entries){
+	//Looks for the entry at status_index to match status, and for the entry at visa_class_index to match visa_class
+	//If either of those don't match, return true and stop reading the line. So the rest of the program can skip the line.
+	//else return false, and read the whole line into entries.
+        istringstream thisline_stringstream( line );  //read the next line of the file into the string 
+	
+	int i=0;
+	parse_error_healer parser;
+
+        while (thisline_stringstream) {  //for every semicollon delimited entry in the line
+                string this_entry;
+                if (!getline( thisline_stringstream, this_entry, ';')) //parse the string, break when at the end of the string.
+			break;  
+
+		//fill this_entry, continuing and appending as necessary to correctly handle parser errors. 
+		if ( parser.handling_parser_errors(this_entry) ) continue;
+		
+		if (i==status_index     and not strings_match_exactly(this_entry, status)) 
+		    return true;
+		if (i==visa_class_index and not strings_match_exactly(this_entry, visa_class)) 
+		    return true;
+
+                entries.push_back( this_entry );
+		i++;
+        }
+        return false;
+}//Parse_line_safely_cuts
+
 
 #endif //String_Utilities_CPP
