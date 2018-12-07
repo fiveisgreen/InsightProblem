@@ -11,7 +11,9 @@ mkdir -p output/
 #mkdir -p insight_testsuite/tests/
 
 #Compile
-g++ -std=c++11 -Wall src/process_file.cpp -o process_file
+g++ -O3 -std=c++14 -stdlib=libc++ -fno-exceptions -fno-rtti -Wall -pedantic -Werror src/process_file.cpp -o process_file
+
+
 
 #Handle input argument cases and run the program
 if [ $# -eq 0 ]; then #If no arguments, grab the first file we find from input/ and process that
