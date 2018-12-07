@@ -11,7 +11,9 @@ mkdir -p output/
 #mkdir -p insight_testsuite/tests/
 
 #Compile
-g++ -O3 -std=c++14 -stdlib=libc++ -fno-exceptions -fno-rtti -Wall -pedantic -Werror src/process_file.cpp -o process_file
+#g++ -O3 -std=c++14 -stdlib=libc++ -fno-exceptions -fno-rtti -Wall -pedantic -Werror src/process_file.cpp -o process_file
+clang++ -O3 -std=c++14 -stdlib=libc++ -fno-exceptions -fno-rtti -Wall -pedantic -Werror -o process_file src/process_file.cpp
+
 
 
 
