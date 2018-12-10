@@ -24,10 +24,15 @@ Therefore, there shall be a map relating the 2 capital letter state abreviation 
 void Build_state_map (map<string,int> & state_count)
 {	//Initalizes a map between all 2 letter state codes and integer counters initalized to 0. 	
 
-	static const int nstates = 60;  //50 states + Washington DC, PUERTO RICO, AMERICAN SAMOA, MICRONESIA, PALAU, and MARSHALL, NORTHERN MARIANA, VIRGIN, and RHODE ISLANDS
+	static const int nstates = 60;  //50 states + Washington DC, Puerto Rico, American Samoa, Micronesia, Palau, Guam, Marshall, Northern Mariana, Virgin Islands + ??
 				   //State "??" is for the case where no state is found. 
 				   //This list is compiled from http://www.postmarks.org/photos/state.htm 
-	static const string states_abbrev_list[nstates] = {"AK", "AL", "AR", "AS", "AZ", "CA", "CO", "CT", "DC", "DE", "FM", "FL", "GA", "GU", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MH", "MI", "MN", "MO", "MP", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "PR", "PW", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VI", "VT", "WA", "WI", "WV", "WY", "??"};
+
+//a list of all state abreviations in alphabetical order
+//static const string states_abbrev_list[nstates] = {"AK", "AL", "AR", "AS", "AZ", "CA", "CO", "CT", "DC", "DE", "FM", "FL", "GA", "GU", "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD", "ME", "MH", "MI", "MN", "MO", "MP", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "PR", "PW", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VI", "VT", "WA", "WI", "WV", "WY", "??"};
+
+//a list of all state abreviations in usage order
+static const string states_abbrev_list[nstates] = {"CA", "TX", "NY", "NJ", "IL", "GA", "MA", "PA", "WA", "FL", "MI", "VA", "NC", "OH", "MD", "CT", "MN", "AZ", "MO", "WI", "IN", "CO", "TN", "OR", "DC", "DE", "AR", "IA", "SC", "UT", "KS", "KY", "RI", "LA", "NE", "OK", "AL", "NH", "NV", "NM", "ID", "MS", "ME", "WV", "ND", "HI", "VT", "GU", "SD", "MT", "DC", "PR", "AK", "MP", "VI", "MH", "PW", "WY","AS","??"};
 
 	for (int i=0;i<nstates;i++)
 		state_count[states_abbrev_list[i]] = 0;
@@ -48,6 +53,7 @@ vector<state_record*> make_sorted_state_record_list (map<string,int> state_count
 
         double total = (double) count_entries(state_count);
         vector<state_record*> state_record_list;
+	state_record_list.reserve(60);//60 "states".
 
 	for (map<string,int>::iterator x = state_count.begin(); x != state_count.end(); ++x) {
 		//Here, for every state, we make a state_record and add that to a list state_record_list
